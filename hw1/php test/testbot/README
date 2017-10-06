@@ -1,0 +1,44 @@
+This is the README file for TESTING BOT FOR CN2017 HW1.
+Author: B04902023 Cheng Shih-Hsiang
+
+[How to use this program]
+To use this testing bot, you need to have php installed.
+To install php, you could simply type "sudo apt-get install php" in ubuntu
+or you can run the program on CSIE workstation, where php package has already been installed.
+
+Before running the program, you may need to change the config file('config.php') to use adequate nickname, channel, and target. 
+"$target" is the bot you want to test, this variable should be set to the nickname
+of the test taker bot.
+
+Type "php php_bot.php" to run the program.
+The program will keep running until the "target" pass the test.
+
+If you want to change the testdata, you can modify the
+testdata('testdata.txt'). testdata format are shown in below.
+
+
+
+[config file example]
+<?php
+$channel = '#CN_Demo';
+$channel_pass = 'ILoveTA';
+$nick = 'php_bot';
+$server = 'irc.freenode.net';
+$port = 6667;
+$testdata_fn = 'testdata.txt';
+$target = 'b04902023';
+?>
+
+[testdata format]
+The first line, N, indicates the number of test cases.
+N test cases follows below.
+Every test case is has the format:
+The type of question (Only 'Q' is used here) (1 line)
+<The question> (1 line)
+The type of answer ('A' or 'A_ip' or 'A_convert') (1 line)
+The number of lines of answers, M. (1 line)
+<The answer> (M lines)
+
+
+
+
