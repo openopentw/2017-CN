@@ -16,6 +16,10 @@ port = 6667 # non-SSL
 channel = '#b04902053'
 botnick = 'PRIVMSG'
 
+with open('./config') as f:
+    channel = f.readline().split("'")[1]
+print(channel)
+
 # connect
 ircsocket = socket.SocketType(socket.AF_INET, socket.SOCK_STREAM)
 ircsocket.connect((host, port))
