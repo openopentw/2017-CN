@@ -29,16 +29,16 @@
     | `gen_dot_poses()` | 用 recursive 的方式，在 ip string 的中間的適合的位置插入小數點 |
     | `gen_be_head()`   | 用來事先判斷這個 string 的每一格是不是 `'0'`            |
     | `gen_be_three()`  | 用來事先判斷這個 string 在這一格的時候可不可以做為 3 位數的 ip 的開頭（例如：254 是可以的，而 278 是不行的） |
-    | `gen_ips()`       | 會呼叫 `gen_dot_poses()` 來產生所有可能的 ip 並回傳。   |
+    | `gen_ips()`       | 會呼叫 `gen_be_head()` 和 `gen_be_three()` 做 preprocessing ，再呼叫 `gen_dot_poses()` 來產生所有可能的 ip 並回傳。 |
 
   - `main.py`
 
     | function     | 作用                                       |
     | ------------ | ---------------------------------------- |
     | `joinchan()` | 給一個 channel string，就會 join 進去            |
-    | `sendmsg()`  | 給定要送的 message，就會自動把 message 轉成 bytes 編碼，再加上要送給的 channel ，再 send 給 IRC server。 |
+    | `sendmsg()`  | 給定要送的 message，就會自動把 message 轉成 UTF-8 編碼，再 append 上 channel ，再 send 給 IRC server。 |
     | `ping()`     | 回應 IRC server 傳過來確認 robot 是否還是 alive 的 "PING"。 |
-    | `main()`     | 用來接收 IRC server 傳過來的訊息，並且辨識 "PING, PONG" 、和使用者傳過來的指令，再一一照著 specification 的規定回應。 |
+    | `main()`     | - join 到 config 裡面寫的 channel<br>- 不斷接收 IRC server 傳過來的訊息<br>- 辨識 "PING, PONG"<br>- 辨識使用者傳過來的指令，再一一照著 specification 的規定回應。 |
 
 ## Challenge & Solution
 
@@ -52,4 +52,4 @@
 
 ## Reflections about this homework
 
-我在測試自己的程式的時候，發現如果輸入不是 spec 裡面規定的格式的 string 時，程式很容易就會死掉。所以我學到了，雖然助教有說不會測試奇怪的測資，但是如果真的要寫關於網路的程式的話，就要很小心使用者可能會輸入奇怪的字串。
+我在測試自己的程式的時候，發現如果輸入不是 spec 裡面規定的格式的 string 時，程式很容易就會死掉。雖然助教有說不會測試奇怪的測資，但是如果真的要寫關於網路的程式的話，我想，應該要很小心使用者可能會輸入奇怪的字串。
