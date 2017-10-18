@@ -112,9 +112,9 @@ def main():
                         sendmsg('@ip <String>')
 
                 else:
-                    print('=== parse name & message error ===')
-                    print('got name: {}'.format(name))
-                    print('got message: {}'.format(message))
+                    # print('=== parse name & message error ===')
+                    # print('got name: {}'.format(name))
+                    # print('got message: {}'.format(message))
 
 if __name__ == "__main__":
     main()
