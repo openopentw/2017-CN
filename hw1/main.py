@@ -37,17 +37,18 @@ def joinchan(chan):
         ircmsg = ircmsg.strip('\n\r')
         # print(ircmsg)
 
+def sendmsg(msg, target=channel):
+    """Send message to specified channel."""
+    msg = bytes('PRIVMSG ' + target + ' :' + msg + '\n', 'UTF-8')
+    sleep(randint(5, 10) / 10) # to avoid throttling due to flooding
+    write(msg)
+    ircsocket.send(msg)
+
 def ping(msg):
     """Respond to server Pings."""
     msg = msg[0:1] + 'O' + msg[2:]
     ircsocket.send(bytes(msg, 'utf-8'))
-
-def sendmsg(msg, target=channel):
-    """Send message to specified channel."""
-    msg = bytes('PRIVMSG ' + target + ' :' + msg + '\n', 'UTF-8')
-    sleep(randint(1, 10) / 10) # to avoid throttling due to flooding
-    write(msg)
-    ircsocket.send(msg)
+    sendmsg('This message should be eaten by irc. QQ.')
 
 def main():
     print('Joining channel ...')
@@ -66,6 +67,7 @@ def main():
 
         elif 'throttled due to flooding' in ircmsg:
             print('=== THROTTLE DUE TO FLOODING ===')
+            # TODO
             sleep(1)
 
         elif ' PRIVMSG ' in ircmsg:
@@ -90,7 +92,7 @@ def main():
                             sendmsg(str(num))
                         else:
                             num = int(num_str)
-                            sendmsg(format(num, '0x'))
+                            sendmsg('0x{}'.format(format(num, '0x')))
 
                     # ip
                     elif message.startswith('@ip '):
