@@ -7,14 +7,14 @@ class udp():
                                   socket.SOCK_DGRAM) # UDP
         self.sock.bind(bind)
 
-    def send_pck(self, msg, dst, pck_info):
+    def send_pck(self, pck, dst, pck_info):
         host, pck_idx = pck_info
-        msg = self.pack_header(host, pck_idx) + msg
-        self.sock.sendto(msg, dst)
+        pck = self.pack_header(host, pck_idx) + pck
+        self.sock.sendto(pck, dst)
 
     def recv_pck(self):
-        data, src = self.sock.recvfrom(1024) # buffer size is 1024 bytes
-        return data[8:], src, self.unpack_header(data[:8])
+        pck, src = self.sock.recvfrom(1024) # buffer size is 1024 bytes
+        return pck[8:], src, self.unpack_header(pck[:8])
 
     def pack_header(self, host, pck_idx):
         ip = struct.unpack("!I", socket.inet_aton(host[0]))[0] # change ip to int
@@ -39,13 +39,13 @@ class tcp(udp):
         self.FIN = 2
         self.FINACK = 3
 
-    def send_pck_with_ack(self, data, dst, pck_info, ack_type, ack_num=0):
-        data = self.pack_acks(ack_type, ack_num) + data
-        self.send_pck(data, dst, pck_info)
+    def send_pck_with_ack(self, pck, dst, pck_info, ack_type, ack_num=0):
+        pck = self.pack_acks(ack_type, ack_num) + pck
+        self.send_pck(pck, dst, pck_info)
 
     def recv_pck_with_ack(self):
-        data, src, pck_info = self.recv_pck()
-        return data[8:], src, pck_info, self.unpack_acks(data[:8])
+        pck, src, pck_info = self.recv_pck()
+        return pck[8:], src, pck_info, self.unpack_acks(pck[:8])
 
     def pack_acks(self, ack_type, ack_num=0):
         pack_ack = ack_type.to_bytes(2, 'big')

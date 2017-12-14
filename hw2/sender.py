@@ -43,13 +43,13 @@ sender = sender_tcp(('127.0.0.1', 8780))
 agt = ('127.0.0.1', 8782)
 dst = ('127.0.0.1', 8781)
 
-# datas = ['Hello~']*100
-# datas = [(str(i)+' '+data).encode() for i,data in enumerate(datas)]
+datas = ['Hello~']*100
+datas = [(str(i)+' '+data).encode() for i,data in enumerate(datas)]
 
-filename = './src/ubuntu.jpg'
-with open(filename, 'rb') as f:
-    data = f.read()
-datas = [ data[i:i+900] for i in range(0, len(data), 900) ]
-datas = [filename.split('.')[-1].encode()] + datas
+# filename = './src/ubuntu.jpg'
+# with open(filename, 'rb') as f:
+#     data = f.read()
+# datas = [ data[i:i+900] for i in range(0, len(data), 900) ]
+# datas = [filename.split('.')[-1].encode()] + datas
 
 sender.send_data(datas, agt, dst)
