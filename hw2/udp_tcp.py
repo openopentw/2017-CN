@@ -1,15 +1,11 @@
 import socket
 import struct
 
-class tcp():
+class udp():
     def __init__(self, bind):
         self.sock = socket.socket(socket.AF_INET, # Internet
                                   socket.SOCK_DGRAM) # UDP
         self.sock.bind(bind)
-
-        self.ACK = 1
-        self.FIN = 2
-        self.FINACK = 3
 
     def send_pck(self, msg, dst, pck_info):
         host, pck_idx = pck_info
@@ -33,6 +29,23 @@ class tcp():
         port = int.from_bytes(header[4:6], byteorder='big')
         pck_idx = int.from_bytes(header[6:8], byteorder='big')
         return (ip, port), pck_idx
+
+class tcp(udp):
+    def __init__(self, bind):
+        udp.__init__(self, bind)
+
+        self.NOACK = 0
+        self.ACK = 1
+        self.FIN = 2
+        self.FINACK = 3
+
+    def send_pck_with_ack(self, data, dst, pck_info, ack_type, ack_num=0):
+        data = self.pack_acks(ack_type, ack_num) + data
+        self.send_pck(data, dst, pck_info)
+
+    def recv_pck_with_ack(self):
+        data, src, pck_info = self.recv_pck()
+        return data[8:], src, pck_info, self.unpack_acks(data[:8])
 
     def pack_acks(self, ack_type, ack_num=0):
         pack_ack = ack_type.to_bytes(2, 'big')
