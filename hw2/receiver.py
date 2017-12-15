@@ -6,8 +6,8 @@ class receiver_tcp(tcp):
         self.default_wndw_sze = 32
 
     def recv_data(self):
-        self.data = []
-        self.wndw = []
+        self.data = b''
+        self.wndw = b''
 
         self.ack_idx = 0
         self.wndw_sze = self.default_wndw_sze
@@ -26,17 +26,19 @@ class receiver_tcp(tcp):
                     self.send_ack_to_src()
                 else:
                     print('recv\tdata\t#{}'.format(ack_idx))
+                    self.wndw += pck
                     self.ack_idx = ack_idx if ack_idx > self.ack_idx else self.ack_idx
                     self.send_ack_to_src()
             elif ack_type == self.FIN:
                 print('recv\tfin')
+                self.flush_wndw()
                 self.send_finack_to_src()
                 break
 
     def flush_wndw(self):
-        # write data outside
+        # TODO: write data outside
         self.data += self.wndw
-        self.wndw = []
+        self.wndw = b''
         self.wndw_beg = self.ack_idx
 
     def recv_from_src(self):
@@ -54,3 +56,4 @@ class receiver_tcp(tcp):
 receiver = receiver_tcp(('127.0.0.1', 8781))
 
 receiver.recv_data()
+print(receiver.data)
