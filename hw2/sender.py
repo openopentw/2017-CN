@@ -1,9 +1,14 @@
+import signal
+
+from functools import partial
 from udp_tcp import tcp
 
 class sender_tcp(tcp):
     def __init__(self, bind):
         tcp.__init__(self, bind)
+        self.sent_idx = 0
         self.default_wndw_sze = 16
+        signal.signal(signal.SIGALRM, partial(self.handler, self))
 
     def send_data(self, data, agt, dst):
         self.data = data
@@ -33,17 +38,24 @@ class sender_tcp(tcp):
             print('receive FINACK')
 
     def send_data_to_dst(self):
-        for i in range(self.last_end, self.wndw_end):
-            print('send:', i)
-            self.send_pck_with_ack(self.data[i], self.agt, (self.dst, i), self.NOACK)
+        for self.sent_idx in range(self.last_end, self.wndw_end):
+            print('send:', self.sent_idx)
+            self.send_pck_with_ack(self.data[self.sent_idx], self.agt, (self.dst, self.sent_idx), self.NOACK)
+            signal.alarm(1)
+            sleep(1)
         self.last_end = self.wndw_end
 
+    def handler(self, alrm_self, signum, frame):
+        print('alarm:', alrm_self.sent_idx)
+
 sender = sender_tcp(('127.0.0.1', 8780))
+
+from time import sleep
 
 agt = ('127.0.0.1', 8782)
 dst = ('127.0.0.1', 8781)
 
-datas = ['Hello~']*100
+datas = ['Hello~']*10
 datas = [(str(i)+' '+data).encode() for i,data in enumerate(datas)]
 
 # filename = './src/ubuntu.jpg'
