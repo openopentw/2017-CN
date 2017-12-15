@@ -3,42 +3,54 @@ from udp_tcp import tcp
 class receiver_tcp(tcp):
     def __init__(self, bind):
         tcp.__init__(self, bind)
+        self.default_wndw_sze = 32
+
+    def recv_data(self):
+        self.data = []
+        self.wndw = []
+
+        self.ack_idx = 0
+        self.wndw_sze = self.default_wndw_sze
+        self.wndw_beg = 0
+
+        # filetype, ack_idx, _ = self.recv_from_src()
+        # print('receive filetype:', filetype)
+        # self.send_ack_to_src(ack_idx)
+
+        while True:
+            pck, ack_idx, ack_type = self.recv_from_src()
+            if ack_type == self.NOACK:
+                if self.wndw_beg + self.wndw_sze < ack_idx:
+                    print('drop\tdata\t#{}'.format(ack_idx))
+                    self.flush_wndw()
+                    self.send_ack_to_src()
+                else:
+                    print('recv\tdata\t#{}'.format(ack_idx))
+                    self.ack_idx = ack_idx if ack_idx > self.ack_idx else self.ack_idx
+                    self.send_ack_to_src()
+            elif ack_type == self.FIN:
+                print('recv\tfin')
+                self.send_finack_to_src()
+                break
+
+    def flush_wndw(self):
+        # write data outside
+        self.data += self.wndw
+        self.wndw = []
+        self.wndw_beg = self.ack_idx
 
     def recv_from_src(self):
-        pck, self.agt, (self.src, pck_idx), (ack_type, _) = self.recv_pck_with_ack()
-        return pck, pck_idx, ack_type
+        pck, self.agt, (self.src, ack_idx), (ack_type, _) = self.recv_pck_with_ack()
+        return pck, ack_idx, ack_type
 
-    def send_ack_to_src(self, ack_num):
-        self.send_pck_with_ack(b'', self.agt, (self.src, 0), self.ACK, ack_num)
+    def send_ack_to_src(self):
+        print('send\tack\t#{}'.format(self.ack_idx))
+        self.send_pck_with_ack(b'', self.agt, (self.src, 0), self.ACK, self.ack_idx)
 
     def send_finack_to_src(self):
+        print('send\tfinack')
         self.send_pck_with_ack(b'', self.agt, (self.src, 0), self.FINACK, 0)
 
 receiver = receiver_tcp(('127.0.0.1', 8781))
 
-filetype, pck_idx, _ = receiver.recv_from_src()
-print('receive filetype:', filetype)
-receiver.send_ack_to_src(pck_idx)
-
-# with open('result.' + filetype.decode(), 'wb') as f:
-#     while True:
-#         pck, pck_idx, ack_type = receiver.recv_from_src()
-#         if ack_type == receiver.NOACK:
-#             print('receive pck_idx:', pck_idx)
-#             f.write(pck)
-#             receiver.send_ack_to_src(pck_idx)
-#         elif ack_type == receiver.FIN:
-#             print('receive FIN')
-#             receiver.send_finack_to_src()
-#             break
-
-while True:
-    pck, pck_idx, ack_type = receiver.recv_from_src()
-    if ack_type == receiver.NOACK:
-        print('receive:', pck)
-        print('receive pck_idx:', pck_idx)
-        receiver.send_ack_to_src(pck_idx)
-    elif ack_type == receiver.FIN:
-        print('receive FIN')
-        receiver.send_finack_to_src()
-        break
+receiver.recv_data()
