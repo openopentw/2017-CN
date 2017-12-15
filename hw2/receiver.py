@@ -9,7 +9,7 @@ class receiver_tcp(tcp):
         self.data = b''
         self.wndw = b''
 
-        self.ack_idx = 0
+        self.ack_idx = -1
         self.wndw_sze = self.default_wndw_sze
         self.wndw_beg = 0
 
@@ -20,14 +20,17 @@ class receiver_tcp(tcp):
         while True:
             pck, ack_idx, ack_type = self.recv_from_src()
             if ack_type == self.NOACK:
-                if self.wndw_beg + self.wndw_sze < ack_idx:
+                if ack_idx > self.wndw_beg + self.wndw_sze:
                     print('drop\tdata\t#{}'.format(ack_idx))
                     self.flush_wndw()
                     self.send_ack_to_src()
                 else:
-                    print('recv\tdata\t#{}'.format(ack_idx))
-                    self.wndw += pck
-                    self.ack_idx = ack_idx if ack_idx > self.ack_idx else self.ack_idx
+                    if ack_idx == self.ack_idx + 1:
+                        print('recv\tdata\t#{}'.format(ack_idx))
+                        self.wndw += pck
+                        self.ack_idx = ack_idx
+                    else:
+                        print('drop\tdata\t#{}'.format(ack_idx))
                     self.send_ack_to_src()
             elif ack_type == self.FIN:
                 print('recv\tfin')
